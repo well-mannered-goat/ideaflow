@@ -1,29 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-const Toolbar = ({ onToolSelect }) => {
-  const [selectedTool, setSelectedTool] = useState('');
-
-  const handleToolSelect = (tool) => {
-    setSelectedTool(tool);
-    onToolSelect(tool);
+const Toolbar = ({ selectTool }) => {
+  const chooseTool = (e) => {
+    const tool = e.target.innerHTML.toLowerCase();
+    console.log(tool);
+    selectTool(tool);
   };
 
   return (
-    <div className="toolbar">
-      <button
-        className={`toolbar-btn ${selectedTool === 'rectangle' ? 'active' : ''}`}
-        onClick={() => handleToolSelect('rectangle')}
-      >
-        <i className="fas fa-rectangle-landscape"></i>
+    <div className="flex flex-row justify-center space-x-5 cursor-default">
+      <div className="cursor-pointer" onClick={chooseTool}>
         Rectangle
-      </button>
-      <button
-        className={`toolbar-btn ${selectedTool === 'circle' ? 'active' : ''}`}
-        onClick={() => handleToolSelect('circle')}
-      >
-        <i className="fas fa-circle"></i>
+      </div>
+      <div className="cursor-pointer" onClick={chooseTool}>
         Circle
-      </button>
+      </div>
     </div>
   );
 };

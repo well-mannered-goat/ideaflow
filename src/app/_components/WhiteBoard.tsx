@@ -3,18 +3,27 @@ import React from 'react';
 import ToolBar from './ToolBar';
 import rough from 'roughjs/bin/rough';
 import { RoughSVG } from 'roughjs/bin/svg';
+import Shape from '@/Shapes/Shapes';
 import Rectangle from '@/Shapes/Rectangle';
 import Circle from '@/Shapes/Circle';
 
-class WhiteBoard extends React.Component {
+interface State{
+    x1:number,
+    y1:number,
+    tool:Shape|null,
+}
+
+class WhiteBoard extends React.Component<{}, State> {
+
+    rect:Rectangle;
+    circle:Circle;
     constructor(props) {
         super(props);
 
         this.state = {
             x1: 0,
-            x2: 0,
             y1: 0,
-            y2: 0,
+            tool: null,
         };
     }
 
@@ -29,8 +38,8 @@ class WhiteBoard extends React.Component {
             console.error('The element is not an SVG element.');
         }
 
-        const rect = new Rectangle(svgElement);
-        const circle=new Circle(svgElement);
+        this.rect=new Rectangle(svgElement);
+        this.circle=new Circle(svgElement);
 
         let moused: number | NodeJS.Timeout = -1;
         let mousem = -1;
@@ -43,15 +52,23 @@ class WhiteBoard extends React.Component {
                     x1: event.clientX,
                     y1: event.clientY,
                 });
-                svgElement?.addEventListener('mousemove', mousemove);
-                moused = setInterval(() => whilemousedown(event), 1); // Changed whilemousedown(event) to () => whilemousedown(event)
+                if(this.state.tool){
+                    svgElement?.addEventListener('mousemove', mousemove);
+                    moused = setInterval(() => whilemousedown(event), 1);
+                }
+                else{
+                    alert('Select tool');
+                }
+                 // Changed whilemousedown(event) to () => whilemousedown(event)
             }
         };
 
         const mouseup = (event: MouseEvent) => {
             if (moused !== -1) {
                 clearInterval(moused);
-                circle.makeCircle(this.state.x1, this.state.y1, (event.clientY - this.state.y1)); // Added svgElement as the last argument
+                //this.circle.makeCircle(this.state.x1, this.state.y1, (event.clientX - this.state.x1));
+                this.state.tool?.makeShape(this.state.x1, this.state.y1, (event.clientX - this.state.x1),(event.clientY-this.state.y1));
+                 // Added svgElement as the last argument
                 console.log(event.clientX);
                 moused = -1;
             }
@@ -59,7 +76,8 @@ class WhiteBoard extends React.Component {
 
         const mousemove = (e: MouseEvent) => {
             if (moused !== -1) {
-                circle.showCircle(this.state.x1, this.state.y1, (e.clientY - this.state.y1)); // Added svgElement as the last argument
+                //this.circle.showCircle(this.state.x1, this.state.y1, (e.clientX - this.state.x1));
+                this.state.tool?.showShape(this.state.x1, this.state.y1, (e.clientX - this.state.x1),(e.clientY-this.state.y1)) // Added svgElement as the last argument
             }
         };
 
@@ -72,11 +90,25 @@ class WhiteBoard extends React.Component {
         svgElement?.addEventListener('mouseout', mouseup);
     }
 
+    selecttheTool = (tool:string) =>{
+        console.log('the selected tool is ',tool)
+        if(tool==='rectangle'){
+            this.setState({
+                tool:this.rect,
+            })
+        }
+        else if(tool==='circle'){
+            this.setState({
+                tool:this.circle,
+            })
+        }
+    }
+
     render() {
         return (
             <div>
-                <div className='flex items-center justify-start min-h-24'>
-                    <ToolBar />
+                <div className='absolute inset-x-0 top-0 flex items-center justify-center min-h-24'>
+                    <ToolBar selectTool={this.selecttheTool} />
                 </div>
 
                 <svg id="svg" className="border border-grey">
