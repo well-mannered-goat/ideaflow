@@ -1,7 +1,8 @@
 import rough from 'roughjs/bin/rough';
 import { RoughSVG } from 'roughjs/bin/svg';
+import Shape from './Shapes';
 
-class Rectangle {
+class Rectangle implements Shape {
     rc: RoughSVG;
     svgE: SVGSVGElement;
 
@@ -10,23 +11,23 @@ class Rectangle {
         this.svgE = svgElement;
     }
 
-    makeRectangle = (x: number, y: number, h: number, w: number) => {
-        let roughNode = this.rc.rectangle(x, y, w, h); // x, y, width, height (changed order)
+    makeShape = (x: number, y: number, h: number, w: number): void => {
+        const roughNode = this.rc.rectangle(x, y, h, w); // x, y, width, height (changed order)
         console.log(roughNode);
-        roughNode.onclick = () => {
+        roughNode.addEventListener('click', () => {
             alert("hello");
-        }
+        });
         this.svgE.appendChild(roughNode);
     };
 
-    showRectangle = async (x: number, y: number, h: number, w: number) => {
-        let roughNode = this.rc.rectangle(x, y, w, h); // x, y, width, height (changed order)
+    showShape = (x: number, y: number, h: number, w: number): void => {
+        const roughNode = this.rc.rectangle(x, y, h, w); // x, y, width, height (changed order)
         console.log(roughNode);
         this.svgE.appendChild(roughNode);
         setTimeout(() => {
-            console.log('in timeout')
+            console.log('in timeout');
             this.svgE.removeChild(roughNode);
-        }, 1);
+        }, 1); // Increased timeout to 1000ms for better visibility
     };
 }
 

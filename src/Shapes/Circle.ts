@@ -1,7 +1,8 @@
 import rough from 'roughjs/bin/rough';
 import { RoughSVG } from 'roughjs/bin/svg';
+import Shape from './Shapes';
 
-class Circle {
+class Circle implements Shape{
     rc: RoughSVG;
     svgE: SVGSVGElement;
 
@@ -10,8 +11,8 @@ class Circle {
         this.svgE = svgElement;
     }
 
-    makeCircle = (x: number, y: number, w: number) => {
-        let roughNode = this.rc.circle(x,y,w); // x, y, width, height (changed order)
+    makeShape = (x: number, y: number, h: number, w: number):void => {
+        let roughNode = this.rc.circle(x, y, h); // x, y, width, height (changed order)
         console.log(roughNode);
         roughNode.onclick = () => {
             alert("hello");
@@ -19,8 +20,8 @@ class Circle {
         this.svgE.appendChild(roughNode);
     };
 
-    showCircle = async (x: number, y: number, w: number) => {
-        let roughNode = this.rc.circle(x,y,w)// x, y, width, height (changed order)
+    showShape = (x: number, y: number, h: number, w: number):void => {
+        let roughNode = this.rc.circle(x, y, h); // x, y, width, height (changed order)
         console.log(roughNode);
         this.svgE.appendChild(roughNode);
         setTimeout(() => {
