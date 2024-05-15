@@ -88,6 +88,8 @@ class WhiteBoard extends React.Component<{}, State> {
         svgElement?.addEventListener('mousedown', mousedown);
         svgElement?.addEventListener('mouseup', mouseup);
         svgElement?.addEventListener('mouseout', mouseup);
+
+
     }
 
     selecttheTool = (tool:string) =>{
@@ -103,6 +105,7 @@ class WhiteBoard extends React.Component<{}, State> {
             })
         }
     }
+
 
     render() {
         return (
