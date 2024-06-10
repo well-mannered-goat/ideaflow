@@ -11,12 +11,12 @@ const Toolbar = ({ selectTool }) => {
     selectTool(tool);
   };
 
-  const socket=new WebSocket('ws://localhost:8080');
+  //const socket=new WebSocket('ws://localhost:8080');
 
-  socket.onopen=()=>{
-    console.log('connected to websocket');
-    socket.send('hello');
-  }
+  // socket.onopen=()=>{
+  //   console.log('connected to websocket');
+  //   socket.send('hello');
+  // }
 
   useEffect(() => {
     const svgElement = document.getElementById('svg');
@@ -25,24 +25,26 @@ const Toolbar = ({ selectTool }) => {
       console.log(drawing);
     }
     const saveButton = document.getElementById('save');
-    if(socket){
-      socket.onmessage = (ev:MessageEvent) =>{
-        if(svgElement){
-          svgElement.innerHTML+=ev.data;
-        }
-      }
-    }
-    let data:string;
+    // if(socket){
+    //   socket.onmessage = (ev:MessageEvent) =>{
+    //     if(svgElement){
+    //       svgElement.innerHTML+=ev.data;
+    //     }
+    //   }
+    // }
+    // let data={
+    //   x1:t
+    // }
     saveButton?.addEventListener('click',()=>{
-      console.log(typeof(svgElement?.innerHTML)  );
-      if(svgElement){
-        data=svgElement.innerHTML!=undefined?(svgElement.innerHTML):"";
-        console.log(data,"data sending");
-      }
-      if(socket?.OPEN){
-        socket.send(data);
-      }
-      setDrawing(data);
+      // console.log(typeof(svgElement?.innerHTML)  );
+      // if(svgElement){
+      //   data=svgElement.innerHTML!=undefined?(svgElement.innerHTML):"";
+      //   console.log(data,"data sending");
+      // }
+      // if(socket?.OPEN){
+      //   socket.send(data);
+      // }
+      //setDrawing(data);
     })
 
     const resetButton=document.getElementById('reset');

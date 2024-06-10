@@ -14,11 +14,20 @@ class Rectangle implements Shape {
     makeShape = (x: number, y: number, h: number, w: number): void => {
         const roughNode = this.rc.rectangle(x, y, h, w); // x, y, width, height (changed order)
         console.log(roughNode);
-        roughNode.addEventListener('click', () => {
+
+        roughNode.firstChild?.addEventListener('mousedown',(event)=>{
+            event.stopPropagation();
+        })
+    
+        roughNode.addEventListener('mousedown', (event) => {
+            // Stop event propagation to prevent the event from reaching the SVG element
+            event.stopPropagation();
+    
             alert("hello");
         });
         this.svgE.appendChild(roughNode);
     };
+    
 
     showShape = (x: number, y: number, h: number, w: number): void => {
         const roughNode = this.rc.rectangle(x, y, h, w); // x, y, width, height (changed order)

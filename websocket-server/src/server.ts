@@ -11,11 +11,17 @@ wss.on('connection', (ws: WebSocket) => {
     }
   })
 
+  function buffersToString(buffers:Buffer[]) {
+    return buffers.map(buffer => buffer.toString()).join('');
+}
+
   ws.on('message', (message) => {
-    console.log(`Received: ${typeof(message)}`);
+    console.log(`Received: ${message}`);
+    const m=message.toLocaleString;
     // Send the message to all other connected clients
     wss.clients.forEach((client: WebSocket) => {
       if (client!== ws && client.readyState === WebSocket.OPEN) {
+        console.log(message.toString(),'sending to clients');
         client.send(message.toString());
       }
     });

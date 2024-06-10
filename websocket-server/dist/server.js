@@ -12,11 +12,16 @@ wss.on('connection', (ws) => {
             client.send("Hello from 8080");
         }
     });
+    function buffersToString(buffers) {
+        return buffers.map(buffer => buffer.toString()).join('');
+    }
     ws.on('message', (message) => {
-        console.log(`Received: ${typeof (message)}`);
+        console.log(`Received: ${message}`);
+        const m = message.toLocaleString;
         // Send the message to all other connected clients
         wss.clients.forEach((client) => {
             if (client !== ws && client.readyState === ws_1.default.OPEN) {
+                console.log(message.toString(), 'sending to clients');
                 client.send(message.toString());
             }
         });
