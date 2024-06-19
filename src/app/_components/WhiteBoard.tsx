@@ -1,41 +1,72 @@
 'use client'
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import ToolBar from './ToolBar';
 import rough from 'roughjs/bin/rough';
 import { RoughSVG } from 'roughjs/bin/svg';
 import Shape from '@/Shapes/Shapes';
 import Rectangle from '@/Shapes/Rectangle';
 import Circle from '@/Shapes/Circle';
-import stringify from 'json-stringify-safe';
+import { useRouter } from 'next/navigation';
+import Modal from './Modal/Modal';
+import JoinRoomModal from './Modal/JoinRoomModal';
 
 interface State {
-    x1: number,
-    y1: number,
-    tool: Shape | null,
-    x2: number,
-    y2: number,
-    message:Object,
+    tool: Shape | null;
+    x2: number;
+    y2: number;
+
 }
 
-class WhiteBoard extends React.Component<{}, State> {
-    rect: Rectangle;
-    circle: Circle;
-    socket: WebSocket;
-    constructor(props) {
-        super(props);
-        this.state = {
-            x1: 0,
-            y1: 0,
-            tool: null,
-            x2: 0,
-            y2: 0,
-            message:'',
-        };
-    }
+interface Message {
+    type: string;
+    roomID: string | null;
+    data: string;
+    command: string;
+}
 
-    componentDidMount() {
+interface DrawData {
+    x1: number,
+    x2: number,
+    y1: number,
+    y2: number,
+    tool: string,
+}
 
-        this.initWebSocket();
+const WhiteBoard: React.FC = () => {
+
+    const router = useRouter();
+    const [state, setState] = useState<State>({
+        tool: null,
+        x2: 0,
+        y2: 0,
+    });
+    const [isOpen, setisOpen] = useState(false);
+    const roomID=useRef<string|null>('0');
+
+    const x1 = useRef<number>(0);
+    const y1 = useRef<number>(0);
+
+    const rectRef = useRef<Rectangle | null>(null);
+    const circleRef = useRef<Circle | null>(null);
+    const socketRef = useRef<WebSocket | null>(null);
+
+    useEffect(() => {
+
+
+        const btn = document.getElementById('open-modal');
+        btn?.addEventListener('click', () => {
+
+            setisOpen(true);
+        })
+        const queryParams = new URLSearchParams(window.location.search);
+        console.log(queryParams.get('roomId'));
+        if (queryParams.has('roomId')) {
+            roomID.current=queryParams.get('roomId');
+        }
+
+        console.log(state);
+
+        initWebSocket();
         const svgElement = document.getElementById('svg');
         if (svgElement instanceof SVGSVGElement) {
             const height = (window.screen.height - 110).toString();
@@ -46,150 +77,200 @@ class WhiteBoard extends React.Component<{}, State> {
             console.error('The element is not an SVG element.');
         }
 
-        this.rect = new Rectangle(svgElement);
-        this.circle = new Circle(svgElement);
+        rectRef.current = new Rectangle(svgElement);
+        circleRef.current = new Circle(svgElement);
 
         let moused: number | NodeJS.Timeout = -1;
         let mousem = -1;
         let interval;
 
-        // Use an arrow function to ensure 'this' refers to the component instance
         const mousedown = (event: MouseEvent) => {
             if (moused === -1) {
-                this.setState({
-                    x1: event.clientX,
-                    y1: event.clientY,
-                });
-                if (this.state.tool) {
+                x1.current = event.clientX;
+                y1.current = event.clientY;
+                if (state.tool) {
                     svgElement?.addEventListener('mousemove', mousemove);
                     moused = setInterval(() => whilemousedown(event), 1);
-                }
-                else {
+                } else {
                     alert('Select tool');
                 }
-                // Changed whilemousedown(event) to () => whilemousedown(event)
             }
         };
 
         const mouseup = (event: MouseEvent) => {
             if (moused !== -1) {
                 clearInterval(moused);
-                //this.circle.makeCircle(this.state.x1, this.state.y1, (event.clientX - this.state.x1));
-                this.state.tool?.makeShape(this.state.x1, this.state.y1, (event.clientX - this.state.x1), (event.clientY - this.state.y1));
-                this.setState({
+                state.tool?.makeShape(x1.current, y1.current, event.clientX - x1.current, event.clientY - y1.current);
+                setState((prevState) => ({
+                    ...prevState,
                     x2: event.clientX,
                     y2: event.clientY,
-                });
+                }));
                 console.log(event.clientX);
 
-                // const data={
-                //     x1:this.state.x1,
-                //     x2:this.state.x2,
-                //     y1:this.state.y1,
-                //     y2:this.state.y2,
-                //     tool:'',
-                // }
-
-                let data:Object;
+                let data: DrawData;
                 const saveButton = document.getElementById('save');
-                //saveButton?.addEventListener('click', () => {
-                    if (svgElement) {
-                        data={
-                            x1:this.state.x1,
-                            x2:event.clientX,
-                            y1:this.state.y1,
-                            y2:event.clientY,
-                            tool:this.state.tool instanceof Rectangle?'Rectangle':'Circle',
-                        }
+                let mes: Message;
+                if (svgElement) {
+                    data = {
+                        x1: x1.current,
+                        x2: event.clientX,
+                        y1: y1.current,
+                        y2: event.clientY,
+                        tool: state.tool instanceof Rectangle ? 'Rectangle' : 'Circle',
+                    };
 
-                        console.log(data, "data sending");
-                    }
-                    if (this.socket?.OPEN) {
-                        this.socket.send(JSON.stringify(data));
-                    }
-                //})
+                    console.log(data, "data sending");
+                }
 
+                if (socketRef.current?.OPEN) {
+                    mes = {
+                        data: JSON.stringify(data),
+                        type: 'request',
+                        roomID: roomID.current,
+                        command: 'SEND DATA',
+                    }
+                    socketRef.current.send(JSON.stringify(mes));
+                }
                 moused = -1;
             }
         };
 
         const mousemove = (e: MouseEvent) => {
             if (moused !== -1) {
-                //this.circle.showCircle(this.state.x1, this.state.y1, (e.clientX - this.state.x1));
-                this.state.tool?.showShape(this.state.x1, this.state.y1, (e.clientX - this.state.x1), (e.clientY - this.state.y1)) // Added svgElement as the last argument
+                state.tool?.showShape(x1.current, y1.current, e.clientX - x1.current, e.clientY - y1.current);
             }
         };
 
         const whilemousedown = (event: MouseEvent) => {
-            console.log(this.state);
+            console.log(state);
         };
 
         svgElement?.addEventListener('mousedown', mousedown);
         svgElement?.addEventListener('mouseup', mouseup);
         svgElement?.addEventListener('mouseout', mouseup);
 
-
-    }
-
-    initWebSocket() {
-        this.socket = new WebSocket('ws://localhost:8080');
-        this.socket.onopen = () => {
-            console.log('connected to websocket');
-            //this.socket.send('hello');
+        return () => {
+            svgElement?.removeEventListener('mousedown', mousedown);
+            svgElement?.removeEventListener('mouseup', mouseup);
+            svgElement?.removeEventListener('mouseout', mouseup);
         };
-        this.socket.onmessage = (ev: MessageEvent) => {
+    }, [state.tool]);
+
+    const initWebSocket = () => {
+        const socket = new WebSocket('ws://localhost:8080');
+        socketRef.current = socket;
+
+        socket.onopen = () => {
+            console.log('connected to websocket');
+        };
+
+        socket.onmessage = (ev: MessageEvent) => {
             console.log("message aaya hai");
-            console.log(JSON.parse(ev.data));
-            this.setState({ message: JSON.parse(ev.data) });
-            console.log(this.state.message);
-            if(JSON.parse(ev.data).tool){
-                this.executeMessage(JSON.parse(ev.data));
+            console.log((ev.data).toString());
+            const mes: Message = JSON.parse(ev.data);
+            if (mes.type === 'response') {
+
+                switch (mes.command) {
+                    case 'ROOM CREATED':
+                        roomID.current=mes.roomID;
+                        console.log(roomID);
+                        router.push(`/whiteboard?roomId=${roomID.current}`)
+                        break;
+
+                    case 'FULL SERVER':
+                        alert('Sorry Server is full');
+                        break;
+
+                    case 'JOINED ROOM':
+                        setState((prevState) => ({
+                            ...prevState,
+                            roomID: mes.roomID,
+                        }))
+                        router.push(`/whiteboard?roomId=${mes.roomID}`);
+                        break;
+
+                    case 'LEFT ROOM':
+                        setState((prevState) => ({
+                            ...prevState,
+                            roomID: '0',
+                        }))
+                        break;
+
+                    case 'DRAWING DATA':
+                        const drawData = JSON.parse(mes.data);
+                        executeMessage(drawData);
+                        break;
+                }
             }
         };
-    }
+    };
 
-    executeMessage = (data:Object) =>{
-        console.log('making shapes',this.state.message);
-        switch(data.tool){
+    const executeMessage = (data: DrawData) => {
+        console.log('making shapes', data);
+        switch (data.tool) {
             case 'Rectangle':
-                this.rect.makeShape(data.x1,data.y1,data.x2-data.x1,data.y2-data.y1);
+                rectRef.current?.makeShape(data.x1, data.y1, data.x2 - data.x1, data.y2 - data.y1);
                 break;
             case 'Circle':
-                this.circle.makeShape(data.x1,data.y1,data.x2-data.x1,data.y2-data.y1);
+                circleRef.current?.makeShape(data.x1, data.y1, data.x2 - data.x1, data.y2 - data.y1);
                 break;
         }
-    }
+    };
 
-    selecttheTool = (tool: string) => {
-        console.log('the selected tool is ', tool)
+    const selecttheTool = (tool: string) => {
+        console.log('the selected tool is ', tool);
         if (tool === 'rectangle') {
-            
-            this.setState({
-                tool: this.rect,
-            })
+            setState((prevState) => ({
+                ...prevState,
+                tool: rectRef.current,
+            }));
+        } else if (tool === 'circle') {
+            setState((prevState) => ({
+                ...prevState,
+                tool: circleRef.current,
+            }));
         }
-        else if (tool === 'circle') {
-            this.setState({
-                tool: this.circle,
-            })
+    };
+
+    const createRoom = () => {
+        let mes: Message = {
+            type: 'request',
+            command: 'CREATE ROOM',
+            roomID: '0',
+            data: '',
         }
-    }
 
+        socketRef.current?.send(JSON.stringify(mes));
 
-    render() {
-        return (
-            <div>
-                <div className='absolute inset-x-0 top-0 flex items-center justify-center min-h-24'>
-                    <ToolBar selectTool={this.selecttheTool} />
-                </div>
+        //router.push(`/whiteboard?roomId=${1234}`);
 
-                <svg id="svg" className="border border-grey">
-                    {/* SVG content goes here */}
-                </svg>
+    };
+
+    
+
+    return (
+        <div className='relative'>
+            <div className='absolute inset-x-0 top-0 flex items-center justify-center min-h-24'>
+                <ToolBar selectTool={selecttheTool} websocket={socketRef.current} createRoom={createRoom} />
             </div>
+            <svg id="svg" className="border border-grey">
+                {/* SVG content goes here */}
+            </svg>
+            <Modal handleClose={() => {
+                let dull=document.getElementById('dull');
+                while(dull){
+                    dull.parentNode?.removeChild(dull);
+                    dull=document.getElementById('dull');
 
-        );
-    }
-}
+                }
+                setisOpen(false)}
+             } isOpen={isOpen}>
+                 <JoinRoomModal socket={socketRef.current}/>
+
+            </Modal>
+        </div>
+    );
+};
 
 export default WhiteBoard;

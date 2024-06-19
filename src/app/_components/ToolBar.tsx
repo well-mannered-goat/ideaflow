@@ -1,10 +1,11 @@
-import React, { useEffect,useState } from 'react';
-import useWebsocket from './WSCLient';
+import React, { useEffect, useState } from 'react';
+import WebSocket from 'ws';
+import Link from 'next/link';
 
-const Toolbar = ({ selectTool }) => {
+const Toolbar = ({ selectTool, websocket, createRoom }) => {
 
-  const [drawing,setDrawing]=useState('');
-  
+  const [drawing, setDrawing] = useState('');
+
   const chooseTool = (e) => {
     const tool = e.target.innerHTML.toLowerCase();
     console.log(tool);
@@ -20,7 +21,7 @@ const Toolbar = ({ selectTool }) => {
 
   useEffect(() => {
     const svgElement = document.getElementById('svg');
-    if(svgElement){
+    if (svgElement) {
       //svgElement.innerHTML=drawing;
       console.log(drawing);
     }
@@ -35,7 +36,7 @@ const Toolbar = ({ selectTool }) => {
     // let data={
     //   x1:t
     // }
-    saveButton?.addEventListener('click',()=>{
+    saveButton?.addEventListener('click', () => {
       // console.log(typeof(svgElement?.innerHTML)  );
       // if(svgElement){
       //   data=svgElement.innerHTML!=undefined?(svgElement.innerHTML):"";
@@ -47,20 +48,24 @@ const Toolbar = ({ selectTool }) => {
       //setDrawing(data);
     })
 
-    const resetButton=document.getElementById('reset');
-    resetButton?.addEventListener('click',()=>{
-      while(svgElement?.lastChild){
+    const resetButton = document.getElementById('reset');
+    resetButton?.addEventListener('click', () => {
+      while (svgElement?.lastChild) {
         svgElement.removeChild(svgElement.lastChild);
       }
     })
 
-    const getButton=document.getElementById('get');
-    getButton?.addEventListener('click',()=>{
-      if(svgElement){
-        svgElement.innerHTML=data;
+    const getButton = document.getElementById('get');
+    getButton?.addEventListener('click', () => {
+      if (svgElement) {
+        svgElement.innerHTML = data;
       }
     })
   }, []);
+
+  const handleClick = () => {
+    console.log(Date.now());
+  }
 
   return (
     <div className="flex flex-row justify-center space-x-5 cursor-default">
@@ -79,8 +84,25 @@ const Toolbar = ({ selectTool }) => {
       <div className='cursor-pointer' id='get'>
         Get
       </div>
+      <div className="cursor-pointer" onClick={createRoom}>
+        Create Room
+      </div>
+      <div className="cursor-pointer">
+        Join room
+      </div>
+      <div>
+        <button id='open-modal'>
+          Open Modal
+        </button>
+      </div>
+
     </div>
   );
 };
 
 export default Toolbar;
+
+
+1718207954846
+
+1718207970445
