@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* styles/global.css */
+@font-face {
+    font-family: 'Amatic SC';
+    src: url('/fonts/Amatic-Bold.ttf') format('truetype');
+  }
+  
+  body {
+    font-family: 'Amatic SC', sans-serif;
+  }
+  

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import WebSocket from 'ws';
 import Link from 'next/link';
 
+
 const Toolbar = ({ selectTool, websocket, createRoom }) => {
 
   const [drawing, setDrawing] = useState('');
@@ -68,7 +69,7 @@ const Toolbar = ({ selectTool, websocket, createRoom }) => {
   }
 
   return (
-    <div className="flex flex-row justify-center space-x-5 cursor-default">
+    <div className="flex flex-row justify-center space-x-5 cursor-default font-amatic text-2xl">
       <div className="cursor-pointer" onClick={chooseTool}>
         Rectangle
       </div>
@@ -87,13 +88,8 @@ const Toolbar = ({ selectTool, websocket, createRoom }) => {
       <div className="cursor-pointer" onClick={createRoom}>
         Create Room
       </div>
-      <div className="cursor-pointer">
+      <div className="cursor-pointer" id='open-modal'>
         Join room
-      </div>
-      <div>
-        <button id='open-modal'>
-          Open Modal
-        </button>
       </div>
 
     </div>

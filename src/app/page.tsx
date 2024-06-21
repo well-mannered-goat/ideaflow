@@ -1,31 +1,44 @@
-import React from 'react';
+'use client'
+import React, { useEffect } from 'react';
 import People from './_components/People';
 import NavBox from './_components/NavBox/NavBox';
-//import 'src/app/global.css'
+import './global.css'
 import WhiteBoard from './_components/WhiteBoard';
 import ToolBar from './_components/ToolBar';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Home() {
-  // return (
-  //   <div className='flex items-center justify-center border border-grey relative'>
-      
-  //     <div className='flex flex-col items-start border border-grey absolute top-0 left-0 bg-white'>
-  //       <NavBox />
-  //     </div>
-  //     <div className=''>
-  //       <WhiteBoard />
-  //     </div>
-  //     <div className='flex flex-col items-end p-2 cursor-default z-10 border border-grey absolute bottom-0 right-0'>
-  //       <People index='4' />
-  //       <People index='4' />
-  //       <People index='4' />
-  //       <People index='4' />
-  //     </div>
+  let path:string='';
+  useEffect(() => {
+    //router=useRouter();
 
-  //   </div>
-  // );
+    document.body.classList.add('bg-green-400');
 
-  return(
-    <h1>Hello to home page</h1>
+    path=window.location.pathname;
+
+    const startBtn=document.getElementById('start');
+    startBtn?.addEventListener('click',()=>{
+      //alert('he;;p');
+      const name:string=document.getElementById('name').value;
+      window.location.href=`whiteboard?name=${name}`
+    })
+  })
+  return (
+    <div>
+      <div className='flex flex-col justify-center items-center h-screen'>
+        <div className='font-amatic text-9xl'>
+          IDEAFLOW
+        </div>
+        <div className='w-72 h-24 py-6 text-black font-amatic text-3xl  '>
+          <input id='name' placeholder='Your name' type='text' className='bg-green-500 w-full h-full border-none text-center rounded-md placeholder:text-slate-900 placeholder:text-center focus:ring-0 focus:border-none'></input>
+        </div>
+        <div>
+          <Link  className='font-amatic text-3xl bg-green-500 w-full h-full rounded-lg' href={path + 'whiteboard'} id='start'>Start</Link>
+        </div>
+      </div>
+
+    </div>
+
   )
 }

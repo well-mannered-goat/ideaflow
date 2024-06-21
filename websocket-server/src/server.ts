@@ -5,6 +5,7 @@ const wss = new WebSocket.Server({ port: 8080 });
 
 interface room {
   users: WebSocket[],
+  userNames:string[],
   data: Object | undefined,
 }
 
@@ -13,17 +14,19 @@ interface response {
   roomID: number,
   data: string,
   command:string,
+  name?:string,
 }
 
 let rooms = new Map<number, room>;
 
-const createRoom = (message: Object, ws: WebSocket) => {
+const createRoom = (message: Object, ws: WebSocket,name:string) => {
   let res: response;
   let roomId = Math.floor(Math.random()*10000);
   console.log(roomId);
   if (!rooms.has(roomId)) {
     let newRoom: room = {
       users: [ws],
+      userNames:[name],
       data: undefined,
     }
     rooms.set(roomId, newRoom);
@@ -35,12 +38,12 @@ const createRoom = (message: Object, ws: WebSocket) => {
     }
   }
   else {
-    res = createRoom(message, ws);
+    res = createRoom(message, ws,name);
   }
   return res;
 }
 
-const joinRoom = (roomId: number, ws: WebSocket) => {
+const joinRoom = (roomId: number, ws: WebSocket,name:string) => {
   let res: response;
   let thisRoom=rooms.get(roomId);
   if (thisRoom && thisRoom.users.length>10){
@@ -53,6 +56,7 @@ const joinRoom = (roomId: number, ws: WebSocket) => {
   }
   else {
     rooms.get(roomId)?.users.push(ws);
+    rooms.get(roomId)?.userNames.push(name);
     res = {
       type: 'response',
       roomID: roomId,
@@ -65,12 +69,18 @@ const joinRoom = (roomId: number, ws: WebSocket) => {
   return res;
 }
 
-const leaveRoom = (roomId: number, ws: WebSocket) => {
+const leaveRoom = (roomId: number, ws: WebSocket,name:string) => {
   let res: response;
-  let index = rooms.get(roomId)?.users.indexOf(ws);
-  if (index) {
-    if (index > -1) {
-      rooms.get(roomId)?.users.splice(index, 1);
+  let WSindex = rooms.get(roomId)?.users.indexOf(ws);
+  let Nameindex=rooms.get(roomId)?.userNames.indexOf(name);
+  if (WSindex) {
+    if (WSindex > -1) {
+      rooms.get(roomId)?.users.splice(WSindex, 1);
+    }
+  }
+  if(Nameindex){
+    if(Nameindex>-1){
+      rooms.get(roomId)?.userNames.splice(Nameindex,1);
     }
   }
   res = {
@@ -102,32 +112,26 @@ const sendData = (roomId:number,drawData:Object,ws:WebSocket) =>{
 
 wss.on('connection', (ws: WebSocket) => {
   console.log('Client connected');
-  
 
-    // wss.clients.forEach((client: WebSocket) => {
-    //   if (client !== ws && client.readyState === WebSocket.OPEN) {
-    //     client.send("Hello from 8080");
-    //   }
-    // })
 
   ws.on('message', (message) => {
     console.log(`Received: ${message}`);
-    const {command,data,type,roomID} = JSON.parse(message.toString());
+    const {command,data,type,roomID,name} = JSON.parse(message.toString());
 
     let res:response;
     switch (command) {
       case 'CREATE ROOM':
-        res = createRoom(JSON.parse(message.toString()), ws);
+        res = createRoom(JSON.parse(message.toString()), ws,name);
         ws.send(JSON.stringify(res));
         break;
 
       case 'JOIN ROOM':
-        res = joinRoom(Number(roomID), ws);
+        res = joinRoom(Number(roomID), ws,name);
         ws.send(JSON.stringify(res));
         break;
 
       case 'LEAVE ROOM':
-        res=leaveRoom(roomID,ws);
+        res=leaveRoom(roomID,ws,name);
         ws.send(JSON.stringify(res));
         break;
 
@@ -142,6 +146,17 @@ wss.on('connection', (ws: WebSocket) => {
         sendData(Number(roomID),drawData,ws);
         ws.send(JSON.stringify(res));
         break;
+
+        case 'SEND NAMES':
+          res={
+            type:'response',
+            roomID:roomID,
+            data:'',
+            command:'USERNAMES',
+            name: rooms.get(Number(roomID))?.userNames.toString()!,
+          }
+          ws.send(JSON.stringify(res));
+          break;
 
     }
     // wss.clients.forEach((client: WebSocket) => {

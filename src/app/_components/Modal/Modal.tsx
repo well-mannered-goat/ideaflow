@@ -9,7 +9,7 @@ function Modal({ children, isOpen, handleClose}: { children: ReactNode, isOpen: 
         // modal?.classList.add('items-center');
         // modal?.classList.add('justify-center');
         //modal?.classList.add('bg-black');
-        modal?.classList.add('z-40');
+        modal?.classList.add('z-50');
         modal?.classList.add('absolute');   
         modal?.classList.add('inset-0');
         modal?.classList.add('my-auto');
@@ -36,9 +36,12 @@ function Modal({ children, isOpen, handleClose}: { children: ReactNode, isOpen: 
         
         const closeOnEscapeKey = (e: KeyboardEvent) => e.key === "Escape" ? handleClose() : null;
         document.body.addEventListener("keydown", closeOnEscapeKey);
+        
         return () => {
             document.body.removeEventListener("keydown", closeOnEscapeKey);
         };
+
+        
     }, [handleClose]);
 
     if (!isOpen) return null;

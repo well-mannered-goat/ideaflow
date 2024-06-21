@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState, useRef } from 'react';
 import ToolBar from './ToolBar';
+import People from './People';
 import rough from 'roughjs/bin/rough';
 import { RoughSVG } from 'roughjs/bin/svg';
 import Shape from '@/Shapes/Shapes';
@@ -22,6 +23,7 @@ interface Message {
     roomID: string | null;
     data: string;
     command: string;
+    name:string
 }
 
 interface DrawData {
@@ -49,6 +51,8 @@ const WhiteBoard: React.FC = () => {
     const rectRef = useRef<Rectangle | null>(null);
     const circleRef = useRef<Circle | null>(null);
     const socketRef = useRef<WebSocket | null>(null);
+    const [name,setName] = useState('');
+    const [names,setNames]=useState(['']);
 
     useEffect(() => {
 
@@ -63,6 +67,7 @@ const WhiteBoard: React.FC = () => {
         if (queryParams.has('roomId')) {
             roomID.current=queryParams.get('roomId');
         }
+        setName(queryParams.get('name')!);
 
         console.log(state);
 
@@ -129,6 +134,7 @@ const WhiteBoard: React.FC = () => {
                         type: 'request',
                         roomID: roomID.current,
                         command: 'SEND DATA',
+                        name:queryParams.get('name')!,
                     }
                     socketRef.current.send(JSON.stringify(mes));
                 }
@@ -165,6 +171,28 @@ const WhiteBoard: React.FC = () => {
             console.log('connected to websocket');
         };
 
+        let mes: Message = {
+            type: 'request',
+            command: 'SEND NAMES',
+            roomID: roomID.current,
+            data: '',
+            name:name
+        }
+
+        socket.addEventListener('open',()=>{
+            console.log('chalu bc');
+
+            if(queryParams.has('roomId')){
+                socket.send(JSON.stringify(mes));
+
+            }
+
+            
+        })
+
+        //socket.send(JSON.stringify(mes));
+        const queryParams=new URLSearchParams(window.location.search);
+        
         socket.onmessage = (ev: MessageEvent) => {
             console.log("message aaya hai");
             console.log((ev.data).toString());
@@ -174,8 +202,9 @@ const WhiteBoard: React.FC = () => {
                 switch (mes.command) {
                     case 'ROOM CREATED':
                         roomID.current=mes.roomID;
+                        queryParams.set('roomId',mes.roomID!);
+                        router.push(`/whiteboard?${queryParams}`)
                         console.log(roomID);
-                        router.push(`/whiteboard?roomId=${roomID.current}`)
                         break;
 
                     case 'FULL SERVER':
@@ -187,7 +216,8 @@ const WhiteBoard: React.FC = () => {
                             ...prevState,
                             roomID: mes.roomID,
                         }))
-                        router.push(`/whiteboard?roomId=${mes.roomID}`);
+                        queryParams.append('roomId',`${mes.roomID}`);
+                        router.push(`/whiteboard?${queryParams}`)
                         break;
 
                     case 'LEFT ROOM':
@@ -200,6 +230,15 @@ const WhiteBoard: React.FC = () => {
                     case 'DRAWING DATA':
                         const drawData = JSON.parse(mes.data);
                         executeMessage(drawData);
+                        break;
+                    
+                    case 'USERNAMES':
+                        //let names:string[];
+                        if(mes.name){
+                            //names=mes.name.split(',')
+                            setNames(mes.name.split(','));
+                        }
+                        console.log(names,' ');
                         break;
                 }
             }
@@ -239,11 +278,20 @@ const WhiteBoard: React.FC = () => {
             command: 'CREATE ROOM',
             roomID: '0',
             data: '',
+            name:name
         }
 
         socketRef.current?.send(JSON.stringify(mes));
 
-        //router.push(`/whiteboard?roomId=${1234}`);
+        let mes1: Message = {
+            type: 'request',
+            command: 'SEND NAMES',
+            roomID: roomID.current,
+            data: '',
+            name:name
+        }
+        socketRef.current?.send(JSON.stringify(mes1));
+
 
     };
 
@@ -257,17 +305,20 @@ const WhiteBoard: React.FC = () => {
             <svg id="svg" className="border border-grey">
                 {/* SVG content goes here */}
             </svg>
+            <div className='flex flex-col items-end p-2 cursor-default border border-grey absolute bottom-0 right-0'>
+                {names.map((n)=>(
+                    <People index={n}/>
+                ))}
+            </div>
             <Modal handleClose={() => {
                 let dull=document.getElementById('dull');
                 while(dull){
                     dull.parentNode?.removeChild(dull);
                     dull=document.getElementById('dull');
-
                 }
                 setisOpen(false)}
              } isOpen={isOpen}>
-                 <JoinRoomModal socket={socketRef.current}/>
-
+                 <JoinRoomModal socket={socketRef.current!} name={name}/>
             </Modal>
         </div>
     );

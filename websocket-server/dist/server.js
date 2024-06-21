@@ -6,13 +6,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ws_1 = __importDefault(require("ws"));
 const wss = new ws_1.default.Server({ port: 8080 });
 let rooms = new Map;
-const createRoom = (message, ws) => {
+const createRoom = (message, ws, name) => {
     let res;
     let roomId = Math.floor(Math.random() * 10000);
     console.log(roomId);
     if (!rooms.has(roomId)) {
         let newRoom = {
             users: [ws],
+            userNames: [name],
             data: undefined,
         };
         rooms.set(roomId, newRoom);
@@ -24,12 +25,12 @@ const createRoom = (message, ws) => {
         };
     }
     else {
-        res = createRoom(message, ws);
+        res = createRoom(message, ws, name);
     }
     return res;
 };
-const joinRoom = (roomId, ws) => {
-    var _a;
+const joinRoom = (roomId, ws, name) => {
+    var _a, _b;
     let res;
     let thisRoom = rooms.get(roomId);
     if (thisRoom && thisRoom.users.length > 10) {
@@ -42,6 +43,7 @@ const joinRoom = (roomId, ws) => {
     }
     else {
         (_a = rooms.get(roomId)) === null || _a === void 0 ? void 0 : _a.users.push(ws);
+        (_b = rooms.get(roomId)) === null || _b === void 0 ? void 0 : _b.userNames.push(name);
         res = {
             type: 'response',
             roomID: roomId,
@@ -53,13 +55,19 @@ const joinRoom = (roomId, ws) => {
     console.log(thisRoom);
     return res;
 };
-const leaveRoom = (roomId, ws) => {
-    var _a, _b;
+const leaveRoom = (roomId, ws, name) => {
+    var _a, _b, _c, _d;
     let res;
-    let index = (_a = rooms.get(roomId)) === null || _a === void 0 ? void 0 : _a.users.indexOf(ws);
-    if (index) {
-        if (index > -1) {
-            (_b = rooms.get(roomId)) === null || _b === void 0 ? void 0 : _b.users.splice(index, 1);
+    let WSindex = (_a = rooms.get(roomId)) === null || _a === void 0 ? void 0 : _a.users.indexOf(ws);
+    let Nameindex = (_b = rooms.get(roomId)) === null || _b === void 0 ? void 0 : _b.userNames.indexOf(name);
+    if (WSindex) {
+        if (WSindex > -1) {
+            (_c = rooms.get(roomId)) === null || _c === void 0 ? void 0 : _c.users.splice(WSindex, 1);
+        }
+    }
+    if (Nameindex) {
+        if (Nameindex > -1) {
+            (_d = rooms.get(roomId)) === null || _d === void 0 ? void 0 : _d.userNames.splice(Nameindex, 1);
         }
     }
     res = {
@@ -90,26 +98,22 @@ const sendData = (roomId, drawData, ws) => {
 };
 wss.on('connection', (ws) => {
     console.log('Client connected');
-    // wss.clients.forEach((client: WebSocket) => {
-    //   if (client !== ws && client.readyState === WebSocket.OPEN) {
-    //     client.send("Hello from 8080");
-    //   }
-    // })
     ws.on('message', (message) => {
+        var _a;
         console.log(`Received: ${message}`);
-        const { command, data, type, roomID } = JSON.parse(message.toString());
+        const { command, data, type, roomID, name } = JSON.parse(message.toString());
         let res;
         switch (command) {
             case 'CREATE ROOM':
-                res = createRoom(JSON.parse(message.toString()), ws);
+                res = createRoom(JSON.parse(message.toString()), ws, name);
                 ws.send(JSON.stringify(res));
                 break;
             case 'JOIN ROOM':
-                res = joinRoom(Number(roomID), ws);
+                res = joinRoom(Number(roomID), ws, name);
                 ws.send(JSON.stringify(res));
                 break;
             case 'LEAVE ROOM':
-                res = leaveRoom(roomID, ws);
+                res = leaveRoom(roomID, ws, name);
                 ws.send(JSON.stringify(res));
                 break;
             case 'SEND DATA':
@@ -121,6 +125,16 @@ wss.on('connection', (ws) => {
                     command: 'DATA SENT',
                 };
                 sendData(Number(roomID), drawData, ws);
+                ws.send(JSON.stringify(res));
+                break;
+            case 'SEND NAMES':
+                res = {
+                    type: 'response',
+                    roomID: roomID,
+                    data: '',
+                    command: 'USERNAMES',
+                    name: (_a = rooms.get(Number(roomID))) === null || _a === void 0 ? void 0 : _a.userNames.toString(),
+                };
                 ws.send(JSON.stringify(res));
                 break;
         }
