@@ -73,14 +73,23 @@ const leaveRoom = (roomId: number, ws: WebSocket,name:string) => {
   let res: response;
   let WSindex = rooms.get(roomId)?.users.indexOf(ws);
   let Nameindex=rooms.get(roomId)?.userNames.indexOf(name);
-  if (WSindex) {
-    if (WSindex > -1) {
-      rooms.get(roomId)?.users.splice(WSindex, 1);
+
+  console.log(WSindex,' ',Nameindex);
+  if (WSindex !== undefined) {
+    if (WSindex >= 0) {
+      const room=rooms.get(roomId);
+      if(room && room.users){
+        room.users.splice(WSindex, 1);
+      }
     }
   }
-  if(Nameindex){
-    if(Nameindex>-1){
-      rooms.get(roomId)?.userNames.splice(Nameindex,1);
+  if(Nameindex !== undefined){
+    if(Nameindex>=0){
+      const room=rooms.get(roomId);
+      if(room && room.userNames){
+        room.userNames.splice(Nameindex,1);
+      }
+      console.log(rooms.get(roomId)?.userNames);
     }
   }
   res = {
@@ -88,7 +97,10 @@ const leaveRoom = (roomId: number, ws: WebSocket,name:string) => {
     roomID: roomId,
     data: '',
     command:'LEFT ROOM',
+    name: rooms.get(roomId)?.userNames.toString()!,
   }
+
+  console.log(rooms.get(roomId))
   return res;
 }
 
@@ -108,6 +120,19 @@ const sendData = (roomId:number,drawData:Object,ws:WebSocket) =>{
     }
   })
   return res;
+}
+
+const sendUnames = (roomID:number) =>{
+  rooms.get(roomID)?.users.forEach((client:WebSocket)=>{
+    let res={
+      type:'response',
+      roomID:roomID,
+      data:'',
+      command:'USERNAMES',
+      name: rooms.get(Number(roomID))?.userNames.toString()!,
+    }
+    client.send(JSON.stringify(res));
+  })
 }
 
 wss.on('connection', (ws: WebSocket) => {
@@ -148,14 +173,16 @@ wss.on('connection', (ws: WebSocket) => {
         break;
 
         case 'SEND NAMES':
-          res={
-            type:'response',
-            roomID:roomID,
-            data:'',
-            command:'USERNAMES',
-            name: rooms.get(Number(roomID))?.userNames.toString()!,
-          }
-          ws.send(JSON.stringify(res));
+          // res={
+          //   type:'response',
+          //   roomID:roomID,
+          //   data:'',
+          //   command:'USERNAMES',
+          //   name: rooms.get(Number(roomID))?.userNames.toString()!,
+          // }
+          // ws.send(JSON.stringify(res));
+
+          sendUnames(Number(roomID));
           break;
 
     }

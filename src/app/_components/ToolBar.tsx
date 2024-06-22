@@ -3,7 +3,7 @@ import WebSocket from 'ws';
 import Link from 'next/link';
 
 
-const Toolbar = ({ selectTool, websocket, createRoom }) => {
+const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }) => {
 
   const [drawing, setDrawing] = useState('');
 
@@ -90,6 +90,9 @@ const Toolbar = ({ selectTool, websocket, createRoom }) => {
       </div>
       <div className="cursor-pointer" id='open-modal'>
         Join room
+      </div>
+      <div className="cursor-pointer" id='leave-room' onClick={leaveRoom}>
+        Leave room
       </div>
 
     </div>

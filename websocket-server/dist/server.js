@@ -60,14 +60,22 @@ const leaveRoom = (roomId, ws, name) => {
     let res;
     let WSindex = (_a = rooms.get(roomId)) === null || _a === void 0 ? void 0 : _a.users.indexOf(ws);
     let Nameindex = (_b = rooms.get(roomId)) === null || _b === void 0 ? void 0 : _b.userNames.indexOf(name);
-    if (WSindex) {
-        if (WSindex > -1) {
-            (_c = rooms.get(roomId)) === null || _c === void 0 ? void 0 : _c.users.splice(WSindex, 1);
+    console.log(WSindex, ' ', Nameindex);
+    if (WSindex !== undefined) {
+        if (WSindex >= 0) {
+            const room = rooms.get(roomId);
+            if (room && room.users) {
+                room.users.splice(WSindex, 1);
+            }
         }
     }
-    if (Nameindex) {
-        if (Nameindex > -1) {
-            (_d = rooms.get(roomId)) === null || _d === void 0 ? void 0 : _d.userNames.splice(Nameindex, 1);
+    if (Nameindex !== undefined) {
+        if (Nameindex >= 0) {
+            const room = rooms.get(roomId);
+            if (room && room.userNames) {
+                room.userNames.splice(Nameindex, 1);
+            }
+            console.log((_c = rooms.get(roomId)) === null || _c === void 0 ? void 0 : _c.userNames);
         }
     }
     res = {
@@ -75,7 +83,9 @@ const leaveRoom = (roomId, ws, name) => {
         roomID: roomId,
         data: '',
         command: 'LEFT ROOM',
+        name: (_d = rooms.get(roomId)) === null || _d === void 0 ? void 0 : _d.userNames.toString(),
     };
+    console.log(rooms.get(roomId));
     return res;
 };
 const sendData = (roomId, drawData, ws) => {
@@ -96,10 +106,23 @@ const sendData = (roomId, drawData, ws) => {
     });
     return res;
 };
+const sendUnames = (roomID) => {
+    var _a;
+    (_a = rooms.get(roomID)) === null || _a === void 0 ? void 0 : _a.users.forEach((client) => {
+        var _a;
+        let res = {
+            type: 'response',
+            roomID: roomID,
+            data: '',
+            command: 'USERNAMES',
+            name: (_a = rooms.get(Number(roomID))) === null || _a === void 0 ? void 0 : _a.userNames.toString(),
+        };
+        client.send(JSON.stringify(res));
+    });
+};
 wss.on('connection', (ws) => {
     console.log('Client connected');
     ws.on('message', (message) => {
-        var _a;
         console.log(`Received: ${message}`);
         const { command, data, type, roomID, name } = JSON.parse(message.toString());
         let res;
@@ -128,14 +151,15 @@ wss.on('connection', (ws) => {
                 ws.send(JSON.stringify(res));
                 break;
             case 'SEND NAMES':
-                res = {
-                    type: 'response',
-                    roomID: roomID,
-                    data: '',
-                    command: 'USERNAMES',
-                    name: (_a = rooms.get(Number(roomID))) === null || _a === void 0 ? void 0 : _a.userNames.toString(),
-                };
-                ws.send(JSON.stringify(res));
+                // res={
+                //   type:'response',
+                //   roomID:roomID,
+                //   data:'',
+                //   command:'USERNAMES',
+                //   name: rooms.get(Number(roomID))?.userNames.toString()!,
+                // }
+                // ws.send(JSON.stringify(res));
+                sendUnames(Number(roomID));
                 break;
         }
         // wss.clients.forEach((client: WebSocket) => {
