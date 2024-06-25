@@ -97,7 +97,7 @@ const leaveRoom = (roomId: number, ws: WebSocket,name:string) => {
     roomID: roomId,
     data: '',
     command:'LEFT ROOM',
-    name: rooms.get(roomId)?.userNames.toString()!,
+    name: name,
   }
 
   console.log(rooms.get(roomId))

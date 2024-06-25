@@ -56,7 +56,7 @@ const joinRoom = (roomId, ws, name) => {
     return res;
 };
 const leaveRoom = (roomId, ws, name) => {
-    var _a, _b, _c, _d;
+    var _a, _b, _c;
     let res;
     let WSindex = (_a = rooms.get(roomId)) === null || _a === void 0 ? void 0 : _a.users.indexOf(ws);
     let Nameindex = (_b = rooms.get(roomId)) === null || _b === void 0 ? void 0 : _b.userNames.indexOf(name);
@@ -83,7 +83,7 @@ const leaveRoom = (roomId, ws, name) => {
         roomID: roomId,
         data: '',
         command: 'LEFT ROOM',
-        name: (_d = rooms.get(roomId)) === null || _d === void 0 ? void 0 : _d.userNames.toString(),
+        name: name,
     };
     console.log(rooms.get(roomId));
     return res;

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import WebSocket from 'ws';
 import Link from 'next/link';
-
+import svg2img from 'svg2img';
+import { Elsie_Swash_Caps } from 'next/font/google';
 
 const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }) => {
 
@@ -38,16 +39,44 @@ const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }) => {
     //   x1:t
     // }
     saveButton?.addEventListener('click', () => {
-      // console.log(typeof(svgElement?.innerHTML)  );
-      // if(svgElement){
-      //   data=svgElement.innerHTML!=undefined?(svgElement.innerHTML):"";
-      //   console.log(data,"data sending");
-      // }
-      // if(socket?.OPEN){
-      //   socket.send(data);
-      // }
-      //setDrawing(data);
+      //const svgString = svgElement?.outerHTML;
+      //console.log(svgString);
+      var svgString = new XMLSerializer().serializeToString(svgElement!);
+
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext("2d");
+      var DOMURL = self.URL || self.webkitURL || self;
+      var img = new Image();
+      var svg = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+      var url = DOMURL.createObjectURL(svg);
+      var png:string;
+      img.onload = function () {
+        ctx!.drawImage(img, 0, 0);
+        png = canvas.toDataURL("image/png");
+        //document.querySelector('#png-container').innerHTML = '<img src="' + png + '"/>';
+        DOMURL.revokeObjectURL(png);
+      };
+      img.src = url;
+      
+      const downloadLInk=document.createElement('a');
+      downloadLInk.href=url;
+      downloadLInk.download='drawing.png';
+      downloadLInk.click();
+      console.log(img);
+
+
+
     })
+
+    const loadImage = async url => {
+      const img = document.createElement('img')
+      img.src = url
+      return new Promise((resolve, reject) => {
+        img.onload = () => resolve(img)
+        img.onerror = reject
+        img.src = url
+      })
+    }
 
     const resetButton = document.getElementById('reset');
     resetButton?.addEventListener('click', () => {
