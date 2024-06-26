@@ -1,5 +1,4 @@
-import { isElementAccessExpression } from 'typescript';
-import WebSocket from 'ws';
+import { WebSocket } from 'ws';
 
 const wss = new WebSocket.Server({ port: 8080 });
 
@@ -173,25 +172,10 @@ wss.on('connection', (ws: WebSocket) => {
         break;
 
         case 'SEND NAMES':
-          // res={
-          //   type:'response',
-          //   roomID:roomID,
-          //   data:'',
-          //   command:'USERNAMES',
-          //   name: rooms.get(Number(roomID))?.userNames.toString()!,
-          // }
-          // ws.send(JSON.stringify(res));
-
           sendUnames(Number(roomID));
           break;
 
     }
-    // wss.clients.forEach((client: WebSocket) => {
-    //   if (client !== ws && client.readyState === WebSocket.OPEN) {
-    //     console.log(message.toString(), 'sending to clients');
-    //     client.send(message.toString());
-    //   }
-    // });
   });
 
   ws.on('close', () => {

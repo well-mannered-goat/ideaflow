@@ -1,10 +1,7 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const ws_1 = __importDefault(require("ws"));
-const wss = new ws_1.default.Server({ port: 8080 });
+const ws_1 = require("ws");
+const wss = new ws_1.WebSocket.Server({ port: 8080 });
 let rooms = new Map;
 const createRoom = (message, ws, name) => {
     let res;
@@ -98,7 +95,7 @@ const sendData = (roomId, drawData, ws) => {
         command: 'DRAWING DATA',
     };
     (_a = rooms.get(roomId)) === null || _a === void 0 ? void 0 : _a.users.forEach((client) => {
-        if (client !== ws && client.readyState === ws_1.default.OPEN) {
+        if (client !== ws && client.readyState === ws_1.WebSocket.OPEN) {
             console.log(drawData, 'sending to clients');
             res.data = JSON.stringify(drawData);
             client.send(JSON.stringify(res));
@@ -151,23 +148,9 @@ wss.on('connection', (ws) => {
                 ws.send(JSON.stringify(res));
                 break;
             case 'SEND NAMES':
-                // res={
-                //   type:'response',
-                //   roomID:roomID,
-                //   data:'',
-                //   command:'USERNAMES',
-                //   name: rooms.get(Number(roomID))?.userNames.toString()!,
-                // }
-                // ws.send(JSON.stringify(res));
                 sendUnames(Number(roomID));
                 break;
         }
-        // wss.clients.forEach((client: WebSocket) => {
-        //   if (client !== ws && client.readyState === WebSocket.OPEN) {
-        //     console.log(message.toString(), 'sending to clients');
-        //     client.send(message.toString());
-        //   }
-        // });
     });
     ws.on('close', () => {
         console.log('Client disconnected');

@@ -10,6 +10,7 @@ import Circle from '@/Shapes/Circle';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Modal from './Modal/Modal';
 import JoinRoomModal from './Modal/JoinRoomModal';
+import { headers } from 'next/headers';
 
 interface State {
     tool: Shape | null;
@@ -191,7 +192,7 @@ const WhiteBoard: React.FC = () => {
 
 
     const initWebSocket = () => {
-        const socket = new WebSocket('ws://localhost:8080');
+        const socket = new WebSocket('wss://ideaflow-websocket-server.glitch.me');
         socketRef.current = socket;
 
         socket.onopen = () => {
