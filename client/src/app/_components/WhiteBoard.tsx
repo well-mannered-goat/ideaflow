@@ -65,8 +65,8 @@ const WhiteBoard: React.FC = () => {
         initWebSocket();
         const svgElement = document.getElementById('svg') as unknown as SVGSVGElement;
         if (svgElement instanceof SVGSVGElement) {
-            const height = (window.screen.height - 110).toString();
-            const width = (window.screen.width - 75).toString();
+            const height = (window.screen.height).toString();
+            const width = (window.screen.width).toString();
             svgElement.setAttribute('height', height);
             svgElement.setAttribute('width', width);
         } else {
@@ -113,7 +113,7 @@ const WhiteBoard: React.FC = () => {
                     };
                 }
 
-                if (socketRef.current?.OPEN) {
+                if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
                     mes = {
                         data: JSON.stringify(data!),
                         type: 'request',
@@ -173,6 +173,7 @@ const WhiteBoard: React.FC = () => {
 
         socket.onopen = () => {
             console.log('connected to websocket');
+            console.log(socket.OPEN);
         };
 
         let mes: Message = {
