@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }:{selectTool:(tool:string)=>void, websocket:WebSocket, createRoom:()=>void, leaveRoom:()=>void}) => {
+const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }:{selectTool:(tool:string)=>void, websocket:WebSocket|null, createRoom:()=>void, leaveRoom:()=>void}) => {
 
   const [drawing, setDrawing] = useState('');
 

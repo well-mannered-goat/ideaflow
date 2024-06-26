@@ -1,7 +1,7 @@
 import { ReactNode, useEffect } from "react";
 import ReactPortal from "./ReactPortal";
 
-function Modal({ children, isOpen, handleClose }: { children: ReactNode, isOpen: boolean, handleClose: () => void}) {
+function Modal({ children, isOpen, handleClose }: { children: ReactNode, isOpen: boolean, handleClose: () => void }) {
     useEffect(() => {
 
         const modal = document.getElementById('react-portal-modal-container')!;
@@ -13,7 +13,6 @@ function Modal({ children, isOpen, handleClose }: { children: ReactNode, isOpen:
         modal?.classList.add('h-32');
         modal?.classList.add('w-64');
         modal?.classList.add('border');
-        // modal?.classList.add('border-grey');
         modal?.classList.add('rounded-lg')
         modal?.classList.add('z-40');
         modal?.classList.add('bg-green-300');
@@ -32,14 +31,14 @@ function Modal({ children, isOpen, handleClose }: { children: ReactNode, isOpen:
         }
 
         const closeOnEscapeKey = (e: KeyboardEvent) => e.key === "Escape" ? handleClose() : null;
-          
-        document.body.addEventListener("keydown",closeOnEscapeKey);
+
+        document.body.addEventListener("keydown", closeOnEscapeKey);
 
         return () => {
             document.body.removeEventListener("keydown", closeOnEscapeKey);
         };
 
- 
+
     },);
 
     if (!isOpen) return null;
