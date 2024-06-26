@@ -1,37 +1,6 @@
-import { useRouter } from "next/router";
-import { useEffect } from "react";
 
+const JoinRoomModal = ({ socket, name, getRoomNo }: { socket: WebSocket, name: string, getRoomNo: () => void }) => {
 
-const JoinRoomModal = ({ socket, name, getRoomNo }: { socket: WebSocket, name: string, getRoomNo:()=>void }) => {
-    // const router=useRouter();
-    // const getRoomNo = () => {
-    //     const roomNo: string = document.getElementById('room-number').value;
-    //     console.log(typeof (roomNo))
-    //     if (roomNo !== '') {
-    //         console.log(socket, '', roomNo);
-    //         const message = {
-    //             type: 'request',
-    //             command: 'JOIN ROOM',
-    //             roomID: roomNo,
-    //             data: '',
-    //             name: name,
-    //         }
-    //         socket.send(JSON.stringify(message));
-
-    //         let mes1 = {
-    //             type: 'request',
-    //             command: 'SEND NAMES',
-    //             roomID: roomNo,
-    //             data: '',
-    //             name: name
-    //         }
-    //         socket.send(JSON.stringify(mes1));
-
-    //     }
-    //     else {
-    //         alert('Help!!!!');
-    //     }
-    // }
     return (
 
 

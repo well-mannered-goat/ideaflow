@@ -22,7 +22,7 @@ function ReactPortal({ children, wrapperId }: { children: ReactElement; wrapperI
         }
         wrapperElement.current = element;
 
-        setIsPortalReady(true); // Indicate that the portal is ready to be rendered
+        setIsPortalReady(true);
 
         return () => {
             if (systemCreated && element?.parentNode) {

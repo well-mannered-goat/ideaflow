@@ -2,21 +2,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ToolBar from './ToolBar';
 import People from './People';
-import rough from 'roughjs/bin/rough';
-import { RoughSVG } from 'roughjs/bin/svg';
 import Shape from '@/Shapes/Shapes';
 import Rectangle from '@/Shapes/Rectangle';
 import Circle from '@/Shapes/Circle';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Modal from './Modal/Modal';
 import JoinRoomModal from './Modal/JoinRoomModal';
-import { headers } from 'next/headers';
 
 interface State {
     tool: Shape | null;
     x2: number;
     y2: number;
-
 }
 
 interface Message {
@@ -61,19 +57,13 @@ const WhiteBoard: React.FC = () => {
     useEffect(() => {
         const queryParams: URLSearchParams = new URLSearchParams(window.location.search);
 
-
         const btn = document.getElementById('open-modal');
         btn?.addEventListener('click', () => {
-
             setisOpen(true);
         })
 
-
-
-        console.log(queryParams.entries());
-
         initWebSocket();
-        const svgElement = document.getElementById('svg');
+        const svgElement = document.getElementById('svg') as unknown as SVGSVGElement;
         if (svgElement instanceof SVGSVGElement) {
             const height = (window.screen.height - 110).toString();
             const width = (window.screen.width - 75).toString();
@@ -87,8 +77,6 @@ const WhiteBoard: React.FC = () => {
         circleRef.current = new Circle(svgElement);
 
         let moused: number | NodeJS.Timeout = -1;
-        let mousem = -1;
-        let interval;
 
         const mousedown = (event: MouseEvent) => {
             if (moused === -1) {
@@ -112,10 +100,8 @@ const WhiteBoard: React.FC = () => {
                     x2: event.clientX,
                     y2: event.clientY,
                 }));
-                console.log(event.clientX);
 
                 let data: DrawData;
-                const saveButton = document.getElementById('save');
                 let mes: Message;
                 if (svgElement) {
                     data = {
@@ -125,13 +111,11 @@ const WhiteBoard: React.FC = () => {
                         y2: event.clientY,
                         tool: state.tool instanceof Rectangle ? 'Rectangle' : 'Circle',
                     };
-
-                    console.log(data, "data sending");
                 }
 
                 if (socketRef.current?.OPEN) {
                     mes = {
-                        data: JSON.stringify(data),
+                        data: JSON.stringify(data!),
                         type: 'request',
                         roomID: roomID.current,
                         command: 'SEND DATA',
@@ -150,14 +134,11 @@ const WhiteBoard: React.FC = () => {
         };
 
         const whilemousedown = (event: MouseEvent) => {
-            console.log(state);
         };
 
         svgElement?.addEventListener('mousedown', mousedown);
         svgElement?.addEventListener('mouseup', mouseup);
         svgElement?.addEventListener('mouseout', mouseup);
-
-
 
         if (queryParams.has('roomId')) {
             setshowRoomId(true);
@@ -168,31 +149,26 @@ const WhiteBoard: React.FC = () => {
             svgElement?.removeEventListener('mouseup', mouseup);
             svgElement?.removeEventListener('mouseout', mouseup);
         };
-    }, [state.tool]);
+    },);
 
 
-    
+
     useEffect(() => {
-        //const searchParams = useSearchParams();
-        const searchParams:URLSearchParams = new URLSearchParams(window.location.search);
+        const searchParams: URLSearchParams = new URLSearchParams(window.location.search);
 
         console.log(searchParams.get('roomId'));
         console.log(searchParams.get('name'));
 
         roomID.current = searchParams.get('roomId');
         name.current = searchParams.get('name')!;
-        //names.current = [name.current];
         setNames([name.current]);
-
-        console.log('yaha naam hai', names)
-
-    },[])
+    }, [])
 
 
 
 
     const initWebSocket = () => {
-        const socket = new WebSocket('wss://ideaflow-websocket-server.glitch.me');
+        const socket = new WebSocket('wss://ideaflow-websocket-server.onrender.com');
         socketRef.current = socket;
 
         socket.onopen = () => {
@@ -208,22 +184,14 @@ const WhiteBoard: React.FC = () => {
         }
 
         socket.addEventListener('open', () => {
-            console.log('chalu bc');
-
             if (queryParams.has('roomId')) {
                 socket.send(JSON.stringify(mes));
-
             }
-
-
         })
 
-        //socket.send(JSON.stringify(mes));
         const queryParams = new URLSearchParams(window.location.search);
 
         socket.onmessage = (ev: MessageEvent) => {
-            console.log("message aaya hai");
-            console.log((ev.data).toString());
             const mes: Message = JSON.parse(ev.data);
             if (mes.type === 'response') {
 
@@ -233,7 +201,6 @@ const WhiteBoard: React.FC = () => {
                         queryParams.set('roomId', mes.roomID!);
                         setshowRoomId(true);
                         router.push(`/whiteboard?${queryParams}`)
-                        console.log(roomID);
                         break;
 
                     case 'FULL SERVER':
@@ -241,10 +208,6 @@ const WhiteBoard: React.FC = () => {
                         break;
 
                     case 'JOINED ROOM':
-                        setState((prevState) => ({
-                            ...prevState,
-                            roomID: mes.roomID,
-                        }))
                         if (queryParams.has('roomId')) {
                             queryParams.delete('roomId');
                         }
@@ -256,24 +219,16 @@ const WhiteBoard: React.FC = () => {
                         break;
 
                     case 'LEFT ROOM':
-                        setState((prevState) => ({
-                            ...prevState,
-                            roomID: '0',
-                        }))
-
                         if (mes.name) {
                             let n = mes.name.split(',');
                             if (n.includes(name.current)) {
-                                //names.current = n;
                                 setNames(n);
                             }
                             else {
-                                //names.current = [name.current];
                                 setNames([name.current]);
                             }
                         }
                         else {
-                            //names.current = [name.current];
                             setNames([name.current]);
                         }
                         queryParams.delete('roomId');
@@ -287,24 +242,20 @@ const WhiteBoard: React.FC = () => {
                         break;
 
                     case 'USERNAMES':
-                        //let names:string[];
                         if (mes.name) {
-                            //names=mes.name.split(',')
-                            //names.current = mes.name.split(',');
-                            const n=mes.name.split(',');
-                            if(n.includes(name.current)){
+                            const n = mes.name.split(',');
+                            if (n.includes(name.current)) {
                                 setNames(mes.name.split(','));
                             }
-                            else{
+                            else {
                                 setNames([name.current]);
                             }
                         }
-                        console.log(names, ' ');
                         break;
                 }
             }
         };
-    };
+    }
 
     const executeMessage = (data: DrawData) => {
         console.log('making shapes', data);
@@ -352,7 +303,6 @@ const WhiteBoard: React.FC = () => {
             name: name.current
         }
         socketRef.current?.send(JSON.stringify(mes1));
-
 
     };
 
@@ -425,13 +375,11 @@ const WhiteBoard: React.FC = () => {
                 }
 
             </div>
-
-
             <div className='absolute inset-x-0 top-0 flex items-center justify-center min-h-24'>
                 <ToolBar selectTool={selecttheTool} websocket={socketRef.current} createRoom={createRoom} leaveRoom={leaveRoom} />
             </div>
             <svg id="svg" className="border border-grey bg-green-200">
-            <rect width="100%" height="100%" fill="#bbf7d0"></rect>
+                <rect width="100%" height="100%" fill="#bbf7d0"></rect>
             </svg>
             <div className='flex flex-col items-end p-2 cursor-default border border-grey absolute bottom-0 right-0'>
                 {names.map((n) => (

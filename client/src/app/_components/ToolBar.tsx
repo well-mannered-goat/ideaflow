@@ -1,46 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import WebSocket from 'ws';
-import Link from 'next/link';
-import svg2img from 'svg2img';
-import { Elsie_Swash_Caps } from 'next/font/google';
-
-const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }) => {
+const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }:{selectTool:(tool:string)=>void, websocket:WebSocket, createRoom:()=>void, leaveRoom:()=>void}) => {
 
   const [drawing, setDrawing] = useState('');
 
-  const chooseTool = (e) => {
-    const tool = e.target.innerHTML.toLowerCase();
-    console.log(tool);
+  const chooseTool = (e:React.MouseEvent<HTMLElement>) => {
+    const tool = (e.target as HTMLElement).innerHTML.toLowerCase();
     selectTool(tool);
   };
 
-  //const socket=new WebSocket('ws://localhost:8080');
-
-  // socket.onopen=()=>{
-  //   console.log('connected to websocket');
-  //   socket.send('hello');
-  // }
-
   useEffect(() => {
     const svgElement = document.getElementById('svg');
-    if (svgElement) {
-      //svgElement.innerHTML=drawing;
-      console.log(drawing);
-    }
     const saveButton = document.getElementById('save');
-    // if(socket){
-    //   socket.onmessage = (ev:MessageEvent) =>{
-    //     if(svgElement){
-    //       svgElement.innerHTML+=ev.data;
-    //     }
-    //   }
-    // }
-    // let data={
-    //   x1:t
-    // }
     saveButton?.addEventListener('click', () => {
-      //const svgString = svgElement?.outerHTML;
-      //console.log(svgString);
       var svgString = new XMLSerializer().serializeToString(svgElement!);
 
       var canvas = document.createElement('canvas');
@@ -49,34 +20,20 @@ const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }) => {
       var img = new Image();
       var svg = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
       var url = DOMURL.createObjectURL(svg);
-      var png:string;
+      var png: string;
       img.onload = function () {
         ctx!.drawImage(img, 0, 0);
         png = canvas.toDataURL("image/png");
-        //document.querySelector('#png-container').innerHTML = '<img src="' + png + '"/>';
         DOMURL.revokeObjectURL(png);
       };
       img.src = url;
-      
-      const downloadLInk=document.createElement('a');
-      downloadLInk.href=url;
-      downloadLInk.download='drawing.png';
+
+      const downloadLInk = document.createElement('a');
+      downloadLInk.href = url;
+      downloadLInk.download = 'drawing.png';
       downloadLInk.click();
-      console.log(img);
-
-
-
     })
 
-    const loadImage = async url => {
-      const img = document.createElement('img')
-      img.src = url
-      return new Promise((resolve, reject) => {
-        img.onload = () => resolve(img)
-        img.onerror = reject
-        img.src = url
-      })
-    }
 
     const resetButton = document.getElementById('reset');
     resetButton?.addEventListener('click', () => {
@@ -85,17 +42,8 @@ const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }) => {
       }
     })
 
-    const getButton = document.getElementById('get');
-    getButton?.addEventListener('click', () => {
-      if (svgElement) {
-        svgElement.innerHTML = data;
-      }
-    })
-  }, []);
 
-  const handleClick = () => {
-    console.log(Date.now());
-  }
+  }, []);
 
   return (
     <div className="flex flex-row justify-center space-x-5 cursor-default font-amatic text-2xl">
@@ -129,8 +77,3 @@ const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }) => {
 };
 
 export default Toolbar;
-
-
-1718207954846
-
-1718207970445

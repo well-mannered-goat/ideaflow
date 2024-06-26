@@ -5,10 +5,6 @@ function Modal({ children, isOpen, handleClose }: { children: ReactNode, isOpen:
     useEffect(() => {
 
         const modal = document.getElementById('react-portal-modal-container')!;
-        // modal?.classList.add('flex');
-        // modal?.classList.add('items-center');
-        // modal?.classList.add('justify-center');
-        //modal?.classList.add('bg-black');
         modal?.classList.add('z-50');
         modal?.classList.add('absolute');
         modal?.classList.add('inset-0');
@@ -61,22 +57,3 @@ function Modal({ children, isOpen, handleClose }: { children: ReactNode, isOpen:
 }
 
 export default Modal;
-
-{/* <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-    <div class="bg-green-400 rounded-lg shadow-lg p-6 w-64">
-        <div class="flex flex-col items-center">
-            <input
-                id="room-number"
-                class="w-full mb-4 px-3 py-2 text-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                type="number"
-                placeholder="Enter Room Number"
-            >
-                <button
-                    id="room-id-button"
-                    class="w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700 transition duration-300"
-                >
-                    Join Room
-                </button>
-        </div>
-    </div>
-</div> */}
