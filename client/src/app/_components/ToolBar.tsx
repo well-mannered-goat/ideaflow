@@ -59,9 +59,6 @@ const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }:{selectTool:(t
       <div className='cursor-pointer' id='reset'>
         Reset
       </div>
-      <div className='cursor-pointer' id='get'>
-        Get
-      </div>
       <div className="cursor-pointer" onClick={createRoom}>
         Create Room
       </div>
@@ -71,7 +68,6 @@ const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }:{selectTool:(t
       <div className="cursor-pointer" id='leave-room' onClick={leaveRoom}>
         Leave room
       </div>
-
     </div>
   );
 };

@@ -149,7 +149,7 @@ const WhiteBoard: React.FC = () => {
             svgElement?.removeEventListener('mouseup', mouseup);
             svgElement?.removeEventListener('mouseout', mouseup);
         };
-    },);
+    },[state.tool]);
 
 
 
@@ -335,8 +335,8 @@ const WhiteBoard: React.FC = () => {
         if (roomNoInput.value) {
             roomNo = roomNoInput.value;
         }
-        console.log(typeof (roomNo))
-        if (roomNo !== '') {
+        console.log(roomNo);
+        if (roomNo !== undefined) {
             console.log(socketRef.current, '', roomNo);
             const message = {
                 type: 'request',
@@ -355,13 +355,22 @@ const WhiteBoard: React.FC = () => {
                 name: name.current
             }
             socketRef.current!.send(JSON.stringify(mes1));
+            handleClose();
 
         }
         else {
-            alert('Enter ROom No');
+            alert('Enter Room No');
         }
     }
 
+    const handleClose = () => {
+        let dull = document.getElementById('dull');
+        while (dull) {
+            dull.parentNode?.removeChild(dull);
+            dull = document.getElementById('dull');
+        }
+        setisOpen(false);
+    }
 
 
     return (
@@ -387,15 +396,9 @@ const WhiteBoard: React.FC = () => {
                     <People key={n} index={n} />
                 ))}
             </div>
-            <Modal handleClose={() => {
-                let dull = document.getElementById('dull');
-                while (dull) {
-                    dull.parentNode?.removeChild(dull);
-                    dull = document.getElementById('dull');
-                }
-                setisOpen(false)
-            }
-            } isOpen={isOpen}
+            <Modal handleClose={handleClose}
+             isOpen={isOpen}
+             handleEnter={getRoomNo}
             >
                 <JoinRoomModal socket={socketRef.current!} name={name.current} getRoomNo={getRoomNo} />
             </Modal>
