@@ -51,6 +51,7 @@ const WhiteBoard: React.FC = () => {
     const socketRef = useRef<WebSocket | null>(null);
     const name = useRef('');
     const [names, setNames] = useState(['']);
+    const roomNoInput=useRef('');
 
 
 
@@ -330,18 +331,13 @@ const WhiteBoard: React.FC = () => {
 
 
     const getRoomNo = () => {
-        const roomNoInput = document.getElementById('room-number') as HTMLInputElement;
-        let roomNo;
-        if (roomNoInput.value) {
-            roomNo = roomNoInput.value;
-        }
-        console.log(roomNo);
-        if (roomNo !== undefined) {
-            console.log(socketRef.current, '', roomNo);
+        console.log(roomNoInput.current);
+        if (roomNoInput.current !== undefined) {
+            console.log(socketRef.current, '', roomNoInput.current);
             const message = {
                 type: 'request',
                 command: 'JOIN ROOM',
-                roomID: roomNo,
+                roomID: roomNoInput.current,
                 data: '',
                 name: name.current,
             }
@@ -350,7 +346,7 @@ const WhiteBoard: React.FC = () => {
             let mes1 = {
                 type: 'request',
                 command: 'SEND NAMES',
-                roomID: roomNo,
+                roomID: roomNoInput.current,
                 data: '',
                 name: name.current
             }
@@ -370,6 +366,11 @@ const WhiteBoard: React.FC = () => {
             dull = document.getElementById('dull');
         }
         setisOpen(false);
+    }
+
+    const getInput = ()=>{
+        const roomINput=document.getElementById('room-number') as HTMLInputElement;
+        roomNoInput.current=roomINput.value;
     }
 
 
@@ -400,7 +401,7 @@ const WhiteBoard: React.FC = () => {
              isOpen={isOpen}
              handleEnter={getRoomNo}
             >
-                <JoinRoomModal socket={socketRef.current!} name={name.current} getRoomNo={getRoomNo} />
+                <JoinRoomModal socket={socketRef.current!} name={name.current} getRoomNo={getRoomNo} getInput={getInput}/>
             </Modal>
         </div>
     );
