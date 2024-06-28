@@ -51,7 +51,7 @@ const WhiteBoard: React.FC = () => {
     const socketRef = useRef<WebSocket | null>(null);
     const name = useRef('');
     const [names, setNames] = useState(['']);
-    const roomNoInput=useRef('');
+    const [roomNoInput,setroomNoInput]=useState('');
 
 
 
@@ -331,13 +331,13 @@ const WhiteBoard: React.FC = () => {
 
 
     const getRoomNo = () => {
-        console.log(roomNoInput.current);
-        if (roomNoInput.current !== undefined) {
-            console.log(socketRef.current, '', roomNoInput.current);
+        console.log(roomNoInput);
+        if (roomNoInput !== undefined) {
+            console.log(socketRef.current, '', roomNoInput);
             const message = {
                 type: 'request',
                 command: 'JOIN ROOM',
-                roomID: roomNoInput.current,
+                roomID: roomNoInput,
                 data: '',
                 name: name.current,
             }
@@ -346,7 +346,7 @@ const WhiteBoard: React.FC = () => {
             let mes1 = {
                 type: 'request',
                 command: 'SEND NAMES',
-                roomID: roomNoInput.current,
+                roomID: roomNoInput,
                 data: '',
                 name: name.current
             }
@@ -370,7 +370,7 @@ const WhiteBoard: React.FC = () => {
 
     const getInput = ()=>{
         const roomINput=document.getElementById('room-number') as HTMLInputElement;
-        roomNoInput.current=roomINput.value;
+        setroomNoInput(roomINput.value);
     }
 
 

@@ -34,15 +34,6 @@ const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }:{selectTool:(t
       downloadLInk.click();
     })
 
-
-    const resetButton = document.getElementById('reset');
-    resetButton?.addEventListener('click', () => {
-      while (svgElement?.lastChild) {
-        svgElement.removeChild(svgElement.lastChild);
-      }
-    })
-
-
   }, []);
 
   return (
@@ -55,9 +46,6 @@ const Toolbar = ({ selectTool, websocket, createRoom, leaveRoom }:{selectTool:(t
       </div>
       <div className='cursor-pointer' id='save'>
         Save
-      </div>
-      <div className='cursor-pointer' id='reset'>
-        Reset
       </div>
       <div className="cursor-pointer" onClick={createRoom}>
         Create Room
