@@ -61,7 +61,7 @@ socket.send(JSON.stringify({
 socket.send(JSON.stringify({
     type: 'request',
     command: 'JOIN ROOM',
-    roomID: 'room123',
+    roomID: '1234',
     data: '',
     name: 'Bob'
 }));
