@@ -15,7 +15,7 @@ websocket-server/node_modules
 /out/
 
 # production
-/build
+websocket-server/dist
 
 # misc
 .DS_Store
